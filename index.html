@@ -48,8 +48,8 @@ function Email() {
         let socketUrl;
         const response = fetch(window.location.pathname+'config').then(async (response) => await Promise.resolve(response.json()))
         .then(async (data)=>{ 
-            socketUrl=data.wsProtocol+"://"+window.location.hostname+":"+data.wsPort; 
-            setSocketUrl(data.wsProtocol+"://"+window.location.hostname+":"+data.wsPort);
+            socketUrl=data.wsProtocol+"://"+window.location.hostname+":"+data.wsPort+data.basePath; 
+            setSocketUrl(data.wsProtocol+"://"+window.location.hostname+":"+data.wsPort+data.basePath);
             const ws = new WebSocket(socketUrl);
             ws.onopen = () => { 
                 console.log('Now connected to '+ socketUrl); 

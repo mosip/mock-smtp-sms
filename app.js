@@ -15,6 +15,7 @@ const SERVER_HOST = process.env.SERVER_HOST || "localhost"
 const WS_PROTOCOL = process.env.WS_PROTOCOL || "ws"
 const WS_EX_PROTOCOL = process.env.WS_EX_PROTOCOL || "ws"
 const WS_EX_SERVER_PORT = process.env.WS_EX_SERVER_PORT || 8081
+const WS_EX_BASE_PATH = process.env.WS_EX_BASE_PATH || ""
 const HTTP_PROTOCOL = process.env.HTTP_PROTOCOL || "http"
 const INDEX = path.join(__dirname, "index.html"); // index address
 
@@ -62,7 +63,8 @@ http_server.get('/', (req, res) => {
 http_server.get('/config', (req, res) => {
     res.send({
         wsProtocol: WS_EX_PROTOCOL,
-        wsPort: WS_EX_SERVER_PORT
+        wsPort: WS_EX_SERVER_PORT,
+        basePath: WS_EX_BASE_PATH
      });
   });
 

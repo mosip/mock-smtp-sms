@@ -65,6 +65,7 @@ SERVER_HOST = localhost
 In case you use a proxy and the websocket ports are not the default ones then use following environment variables to inform the client.
 
 ```
-WS_EX_PROTOCOL = "ws"
-WS_EX_SERVER_PORT = 8081
+WS_EX_PROTOCOL = "ws" //set this to wss if running over https
+WS_EX_SERVER_PORT = 8081 // if https set this to 443 and map it to the basepath
+WS_EX_BASE_PATH = "" //set your base path
 ```
