@@ -46,7 +46,7 @@ function Email() {
 
     const loadDataOnlyOnce = () => {
         let socketUrl;
-        const response = fetch('/config').then(async (response) => await Promise.resolve(response.json()))
+        const response = fetch('config').then(async (response) => await Promise.resolve(response.json()))
         .then(async (data)=>{ 
             socketUrl=data.wsProtocol+"://"+window.location.hostname+":"+data.wsPort; 
             setSocketUrl(data.wsProtocol+"://"+window.location.hostname+":"+data.wsPort);
