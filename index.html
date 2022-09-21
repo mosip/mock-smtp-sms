@@ -1,0 +1,135 @@
+<head>
+    <meta charset="UTF-8" />
+    <title>Welcome To The Mock Email World</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css" />    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src=""https://github.com/joewalnes/reconnecting-websocket/commit/f8055b77ba75e5d564ffb50d20a483bdd7edccdf"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+        },
+      }
+    }
+  }
+</script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+
+
+function Email() {
+  //const [count, setCount] = React.useState(0);
+  const [mails, setMyMail] = React.useState([
+    {   attachments: [],
+        date: "",
+        from : {text:""},
+        headerLines: [],
+        headers:{},
+        messageId:"",
+        subject:"",
+        text:"",
+        textAsHtml:"",
+        to:{}
+    }]);
+  const [wsSocket,setSocketUrl] = React.useState(); 
+  const [status, setStatus] = React.useState(false);
+  
+
+    const loadDataOnlyOnce = () => {
+        let socketUrl;
+        const response = fetch('/config').then(async (response) => await Promise.resolve(response.json()))
+        .then(async (data)=>{ 
+            socketUrl=data.wsProtocol+"://"+window.location.hostname+":"+data.wsPort; 
+            setSocketUrl(data.wsProtocol+"://"+window.location.hostname+":"+data.wsPort);
+            const ws = new WebSocket(socketUrl);
+            ws.onopen = () => { 
+                console.log('Now connected to '+ socketUrl); 
+                setStatus(true);
+            };
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                console.log(message);
+                setMyMail(mails=>[message,...mails]   );
+                console.log("All done");
+            };
+            ws.onclose = (event) => {
+                setStatus(false);
+            };
+            ws.onerror = (event) => {
+                setStatus(false);
+            }
+
+    });
+
+       // console.log(wsSocket);
+        /*const ws = new WebSocket(wsSocket);
+        ws.onopen = () => { 
+            console.log('Now connected'); 
+        };
+        ws.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            console.log(message);
+            setMyMail(mails=>[message,...mails]   );
+            console.log("All done");
+        };
+*/
+        console.log("loadDataOnlyOnce");
+    };
+
+  // Similar to componentDidMount and componentDidUpdate:  
+  React.useEffect(() => {    // Update the document title using the browser API    
+    loadDataOnlyOnce();},[]);
+    
+  return (
+    <div className="container mt-6 ml-6 justify-center">
+        {"Connection Status: " + status}
+      <div>
+    <button type="button" onClick={() => window.location.reload(false)} className="inline-block px-6 pt-2.5 pb-2 bg-blue-600 text-white font-medium text-xs leading-normal uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"> Reload
+    </button>
+  </div>
+  
+<ol className="mt-6 border-l-2 border-blue-600">
+    {mails.map((mailItem, index)=> (
+        
+        <div key={index} className="border-b-2 ">
+        <li>
+    <div className="flex flex-start items-center">
+      <div className="bg-blue-600 w-4 h-4 flex items-center justify-center rounded-full -ml-2 mr-3 -mt-2"></div>  
+      <div className="flex text-gray-600 font-semibold text-xl mt-1 text-ellipsis overflow-hidden whitespace-normal ml-2 mr-3 -mt-2 w-80">    {mailItem.to.text}</div>
+    <div className="flex text-gray-600 font-semibold text-xl mt-1 text-ellipsis overflow-hidden whitespace-normal ml-2 mr-3 -mt-2">{mailItem.subject}</div>
+    </div>
+    <div className="flex flex-start items-center">
+        <div className="w-4 h-4 flex items-center justify-center rounded-full -ml-2 mr-3 -mt-2"></div>
+        <div className="flex text-sm text-slate-500 ml-2 mr-3 mb-2 duration-300 transition ease-in-out w-80">
+      Date:  {new Date(mailItem.date).toLocaleString() } </div>
+      <div className="flex text-sm text-slate-500 truncate ml-2 mr-3 mb-2 duration-300 transition ease-in-out">From: {mailItem.from.text}</div>
+    </div>
+    <div className="flex flex-start items-center">
+      <p className="text-gray-700 mb-2 mr-3 ml-4">{mailItem.text || mailItem.html}</p>
+    </div>
+  </li>
+  </div>
+  ))}
+  </ol>
+</div>
+  );
+  
+}
+
+
+ReactDOM.render(
+        <Email />,
+        document.getElementById('root')
+      );
+    </script>
+  </body>
+</html>
