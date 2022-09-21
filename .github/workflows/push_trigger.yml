@@ -1,0 +1,50 @@
+
+name: Maven Package upon a push
+
+on:
+  push:
+    branches:
+      - '!release-branch'
+      - release-1*
+      - master
+      - 1.0.*
+      - develop
+      - 1.1.*
+      - MOSIP-11719
+      - 1.2.*
+
+jobs:
+  build-mock-smtp:
+    runs-on: ubuntu-latest
+    env:
+      NAMESPACE: ${{ secrets. dev_namespace_docker_hub }}
+      SERVICE_NAME: mock-smtp
+      SERVICE_LOCATION: mock-smtp
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          docker build . --file Dockerfile --tag ${{ env.SERVICE_NAME }} --network host
+
+      - name: Log into registry
+        run: echo "${{ secrets.release_docker_hub }}" | docker login -u ${{ secrets.actor_docker_hub }} --password-stdin
+
+      - name: Push image
+        run: |
+          IMAGE_ID=$NAMESPACE/$SERVICE_NAME
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          if [[ $BRANCH_NAME == master ]]; then
+            VERSION=latest
+          else
+            VERSION=$BRANCH_NAME
+          fi
+          echo "push version $VERSION"
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $SERVICE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
