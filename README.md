@@ -1,12 +1,41 @@
-# Mock SMTP server
+# Mock SMTP/SMS server
+The implementation supports a mock SMTP server and a mock SMS using HTTP API.
 
-The mock smtp server listens on a SMTP port and provides an ability to receive emails. Intead of sending the emails to the ncessary email id it would send the email to the websocket so you could see the email on the browser. 
+The mock smtp server listens on an SMTP port and provides the ability to receive emails. Instead of sending the emails to the necessary email id,  it would send the email to the websocket so you could see the email on the browser. 
 
-The mock provides as with the ability to test applications that use SMTP to deliver emails. 
+The mock provides the ability to test applications that use SMTP to deliver emails. 
 
-__Note:__ As of now we have not handled other features of SMTP. Only a happy flow is implemented.
+__Note:__ As of now we have not handled other features of SMTP/SMS. Only a happy flow is implemented.
 
+The Mock has the following API for testing SMS. 
+```
 
+  /sendsms: 
+    get: 
+      summary: ""
+      description: ""
+      parameters: 
+        - 
+          name: "mobiles"
+          type: "string"
+          in: "query"
+          description: "To whom we should send the SMS"
+          required: true
+        - 
+          name: "sender"
+          type: "string"
+          in: "query"
+          description: "From whom should we send the SMS"
+          required: true
+        - 
+          name: "message"
+          type: "string"
+          in: "query"
+          description: "Actual message"
+          required: true
+
+```
+In order for the mock to be efficient all additional parameters and headers are ignored. 
 
 ## Build and Run. 
 
@@ -21,7 +50,7 @@ npm start
 
 Type this URL http://locahost:8080/ in your browser to access the emails.
 
-* The emails are broadcasted to all currently open websockets. So you could miss the email if you are not connected.  
+* The emails/SMS are broadcasted to all currently open websockets. So you could miss the email/SMS if you are not connected.  
 
 * The current connection status is shown on top of this page.
 
@@ -75,4 +104,22 @@ WS_EX_BASE_PATH = "" //set your base path
 Use the below command to send a test email
 ```
 sendEmail -f sasi@yazhi.io -t test@localhost.com -s localhost:8025 -u "Test send the mail" -m "Sending the email for test"
+```
+
+Use the below api to test the SMS
+```
+curl 'http://localhost:8080/sendsms?mobiles=9123456789&sender=xyz&message=this%20is%20your%20sms' \
+  -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' \
+  -H 'Accept-Language: en-GB,en-US;q=0.9,en;q=0.8' \
+  -H 'Cache-Control: no-cache' \
+  -H 'Connection: keep-alive' \
+  -H 'DNT: 1' \
+  -H 'Pragma: no-cache' \
+  -H 'Sec-Fetch-Dest: document' \
+  -H 'Sec-Fetch-Mode: navigate' \
+  -H 'Sec-Fetch-Site: none' \
+  -H 'Sec-Fetch-User: ?1' \
+  -H 'Upgrade-Insecure-Requests: 1' \
+  -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36' \
+  --compressed
 ```

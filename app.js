@@ -5,6 +5,8 @@ const simpleParser = require('mailparser').simpleParser;
 const WebSocket = require("ws");
 const express = require("express");
 const path = require('path');
+const req = require('express/lib/request');
+const res = require('express/lib/response');
 
 
 
@@ -30,6 +32,7 @@ const smtp_server = new SMTPServer({
         //stream.pipe(process.stdout);
         simpleParser(stream, {skipHtmlToText: false, skipImageLinks: false, skipTextToHtml: false, skipTextLinks: false, keepCidLinks: true})
             .then(parsed => {
+                parsed.type="MAIL";
                 console.log(parsed);
                 broadCast(parsed);
             })
@@ -52,7 +55,8 @@ smtp_server.on('error', err => {
 smtp_server.listen(SMTP_SERVER_PORT, SERVER_HOST)
 console.log(`\x1b[33m SMTP Server Running on ${SERVER_HOST}:${SMTP_SERVER_PORT}\x1b[0m`)
 
-const http_server = express()
+const http_server = express();
+
 
 //Set the route for index file
 http_server.get('/', (req, res) => {
@@ -67,6 +71,26 @@ http_server.get('/config', (req, res) => {
         basePath: WS_EX_BASE_PATH
      });
   });
+
+//set the route for SMS
+http_server.get('/sendsms', (req, res, next) => {
+  try{
+    let message ={}
+    message.type = "SMS";
+    message.date = new Date().toJSON();
+    message.to = {"text": req.query.mobiles};
+    message.from = {"text": req.query.sender};
+    message.subject = "SMS: " + req.query.message;
+    message.text = req.query.message;
+    console.log(message);
+    broadCast(message);
+    res.sendStatus(200);
+  }
+  catch(error){
+    console.log('Error: SMS Error occurred ');
+    console.log(error);
+  };
+});
 
 //Listen to the http port
   http_server.listen(SERVER_PORT, () => {
