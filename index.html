@@ -1,6 +1,6 @@
 <head>
     <meta charset="UTF-8" />
-    <title>Welcome To The Mock Email World</title>
+    <title>Welcome To The Mock Email/SMS World</title>
     <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -102,8 +102,10 @@ function Email() {
         
         <div key={index} className="border-b-2 ">
         <li>
+
     <div className="flex flex-start items-center">
       <div className="bg-blue-600 w-4 h-4 flex items-center justify-center rounded-full -ml-2 mr-3 -mt-2"></div>  
+        <i className={mailItem.type==="MAIL"?"fa fa-envelope": "fa fa-commenting" }></i>
       <div className="flex text-gray-600 font-semibold text-xl mt-1 text-ellipsis overflow-hidden whitespace-normal ml-2 mr-3 -mt-2 w-80">    {mailItem.to.text}</div>
     <div className="flex text-gray-600 font-semibold text-xl mt-1 text-ellipsis overflow-hidden whitespace-normal ml-2 mr-3 -mt-2">{mailItem.subject}</div>
     </div>
@@ -114,7 +116,7 @@ function Email() {
       <div className="flex text-sm text-slate-500 truncate ml-2 mr-3 mb-2 duration-300 transition ease-in-out">From: {mailItem.from.text}</div>
     </div>
     <div className="flex flex-start items-center">
-      <p className="text-gray-700 mb-2 mr-3 ml-4">{mailItem.text || mailItem.html}</p>
+      <p className="text-gray-700 mb-2 mr-3 ml-4">{mailItem.html || mailItem.text}</p>
     </div>
   </li>
   </div>
