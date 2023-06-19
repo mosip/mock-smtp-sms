@@ -105,7 +105,6 @@ Use the below command to send a test email
 ```
 sendEmail -f sasi@yazhi.io -t test@localhost.com -s localhost:8025 -u "Test send the mail" -m "Sending the email for test"
 ```
-
 Use the below api to test the SMS
 ```
 curl 'http://localhost:8080/sendsms?mobiles=9123456789&sender=xyz&message=this%20is%20your%20sms' \
