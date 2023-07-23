@@ -8,7 +8,6 @@ LABEL source=${SOURCE}
 LABEL commit_hash=${COMMIT_HASH}
 LABEL commit_id=${COMMIT_ID}
 LABEL build_time=${BUILD_TIME}
-
 WORKDIR /usr/src/app
 
 ENV SERVER_HOST=0.0.0.0
