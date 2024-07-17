@@ -31,7 +31,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - SERVICE_LOCATION: './'
+          - SERVICE_LOCATION: './smtp'
             SERVICE_NAME: 'mock-smtp'
       fail-fast: false
     uses: mosip/kattu/.github/workflows/docker-build.yml@master
