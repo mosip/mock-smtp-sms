@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:20-alpine
 
 ARG SOURCE
 ARG COMMIT_HASH
@@ -8,18 +8,24 @@ LABEL source=${SOURCE}
 LABEL commit_hash=${COMMIT_HASH}
 LABEL commit_id=${COMMIT_ID}
 LABEL build_time=${BUILD_TIME}
+
 WORKDIR /usr/src/app
 
 ENV SERVER_HOST=0.0.0.0
 
-COPY . ./
+# Copy manifests first so dependency layer is cached independently of source changes
+COPY package*.json ./
+RUN npm ci --omit=dev
 
-RUN npm install
+# Copy application source
+COPY app.js index.html ./
 
-RUN npm ci --only=production
+# Drop root privileges
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
 
 EXPOSE 8080
 EXPOSE 8081
 EXPOSE 8025
 
-CMD [ "node", "app.js" ]
+CMD ["node", "app.js"]
