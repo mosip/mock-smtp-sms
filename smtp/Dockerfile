@@ -1,3 +1,12 @@
+FROM node:20-alpine AS builder
+
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+
 FROM node:20-alpine
 
 ARG SOURCE
@@ -13,9 +22,7 @@ WORKDIR /usr/src/app
 
 ENV SERVER_HOST=0.0.0.0
 
-# Copy manifests first so dependency layer is cached independently of source changes
-COPY package*.json ./
-RUN npm ci --omit=dev
+COPY --from=builder /usr/src/app/node_modules ./node_modules
 
 # Copy application source
 COPY app.js index.html ./
