@@ -21,9 +21,6 @@ const WS_EX_BASE_PATH = process.env.WS_EX_BASE_PATH || ""
 const HTTP_PROTOCOL = process.env.HTTP_PROTOCOL || "http"
 const INDEX = path.join(__dirname, "index.html"); // index address
 
-const messageHistory = [];
-const MAX_HISTORY = 20;
-
 const smtp_server = new SMTPServer({
     logger: false,
 
@@ -135,17 +132,6 @@ socketServer.on('connection', (socketClient) => {
     console.log('Number of clients: ', socketServer.clients.size);
     socketClient.isAlive = true;
     socketClient.on('pong', heartbeat);
-
-    // Send message history to newly connected client
-    messageHistory.forEach(msg => {
-        try {
-            if (socketClient.readyState === WebSocket.OPEN) {
-                socketClient.send(JSON.stringify(msg));
-            }
-        } catch(e) {
-            console.log('Error sending history to client:', e);
-        }
-    });
     
     socketClient.on('message', (message) => {
       broadCast(message);
@@ -174,21 +160,10 @@ socketServer.on('connection', (socketClient) => {
    * Broadcasts the mail to all the connected sockets
    * @param {*} message 
    */
-  function broadCast(message){
-    messageHistory.push(message);
-    if (messageHistory.length > MAX_HISTORY) messageHistory.shift();
-
-    let payload;
-    try {
-        payload = JSON.stringify(message);
-    } catch(e) {
-        console.log('Error serializing message:', e);
-        return;
-    }
-
+  function broadCast(message){  
     socketServer.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
-          client.send(payload);
+          client.send(JSON.stringify(message));
         }
       });
   }
