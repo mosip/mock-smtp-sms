@@ -1,137 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <title>Welcome To The Mock Email/SMS World</title>
-    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="icon" href="data:,">
+
+    <!-- React -->
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+
+    <!-- Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css" />    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css" />
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src=""https://github.com/joewalnes/reconnecting-websocket/commit/f8055b77ba75e5d564ffb50d20a483bdd7edccdf"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        fontFamily: {
-          sans: ['Inter', 'sans-serif'],
-        },
+
+    <!-- Reconnecting WebSocket -->
+    <script src="https://cdn.jsdelivr.net/npm/reconnecting-websocket@4.4.0/dist/reconnecting-websocket-iife.min.js"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+          }
+        }
       }
-    }
-  }
-</script>
-  </head>
-  <body>
+    </script>
+</head>
+<body>
     <div id="root"></div>
-    <script type="text/babel">
 
-
+    <script>
 function Email() {
-  //const [count, setCount] = React.useState(0);
-  const [mails, setMyMail] = React.useState([
-    {   attachments: [],
-        date: "",
-        from : {text:""},
-        headerLines: [],
-        headers:{},
-        messageId:"",
-        subject:"",
-        text:"",
-        textAsHtml:"",
-        to:{}
-    }]);
-  const [wsSocket,setSocketUrl] = React.useState(); 
+  const [mails, setMails] = React.useState([]);
   const [status, setStatus] = React.useState(false);
-  
+  const wsRef = React.useRef(null);
 
-    const loadDataOnlyOnce = () => {
-        let socketUrl;
-        const response = fetch(window.location.pathname+'config').then(async (response) => await Promise.resolve(response.json()))
-        .then(async (data)=>{ 
-            socketUrl=data.wsProtocol+"://"+window.location.hostname+":"+data.wsPort+data.basePath; 
-            setSocketUrl(data.wsProtocol+"://"+window.location.hostname+":"+data.wsPort+data.basePath);
-            const ws = new WebSocket(socketUrl);
-            ws.onopen = () => { 
-                console.log('Now connected to '+ socketUrl); 
-                setStatus(true);
-            };
-            ws.onmessage = (event) => {
-                const message = JSON.parse(event.data);
-                console.log(message);
-                setMyMail(mails=>[message,...mails]   );
-                console.log("All done");
-            };
-            ws.onclose = (event) => {
-                setStatus(false);
-            };
-            ws.onerror = (event) => {
-                setStatus(false);
-            }
+  React.useEffect(() => {
+    fetch(window.location.pathname + 'config')
+      .then(response => response.json())
+      .then(data => {
+        const socketUrl = `${data.wsProtocol}://${window.location.hostname}:${data.wsPort}${data.basePath}`;
+        console.log("Connecting to WebSocket:", socketUrl);
 
-    });
+        const socket = new ReconnectingWebSocket(socketUrl);
+        wsRef.current = socket;
 
-       // console.log(wsSocket);
-        /*const ws = new WebSocket(wsSocket);
-        ws.onopen = () => { 
-            console.log('Now connected'); 
+        socket.onopen = () => {
+          console.log('WebSocket Connected');
+          setStatus(true);
         };
-        ws.onmessage = (event) => {
+
+        socket.onmessage = (event) => {
+          try {
             const message = JSON.parse(event.data);
-            console.log(message);
-            setMyMail(mails=>[message,...mails]   );
-            console.log("All done");
+            console.log("New message received:", message);
+            setMails(prev => [message, ...prev]);
+          } catch (e) {
+            console.error("Failed to parse message:", e);
+          }
         };
-*/
-        console.log("loadDataOnlyOnce");
+
+        socket.onclose = () => {
+          console.log('WebSocket Disconnected');
+          setStatus(false);
+        };
+
+        socket.onerror = (err) => {
+          console.error('WebSocket Error:', err);
+          setStatus(false);
+        };
+      })
+      .catch(err => {
+        console.error("Failed to fetch config:", err);
+      });
+
+    return () => {
+      if (wsRef.current) wsRef.current.close();
     };
+  }, []);
 
-  // Similar to componentDidMount and componentDidUpdate:  
-  React.useEffect(() => {    // Update the document title using the browser API    
-    loadDataOnlyOnce();},[]);
-    
-  return (
-    <div className="container mt-6 ml-6 justify-center">
-        {"Connection Status: " + status}
-      <div>
-    <button type="button" onClick={() => window.location.reload(false)} className="inline-block px-6 pt-2.5 pb-2 bg-blue-600 text-white font-medium text-xs leading-normal uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"> Reload
-    </button>
-  </div>
-  
-<ol className="mt-6 border-l-2 border-blue-600">
-    {mails.map((mailItem, index)=> (
-        
-        <div key={index} className="border-b-2 ">
-        <li>
+  return React.createElement('div', { className: "container mx-auto mt-8 px-6" },
+    // Header
+    React.createElement('div', { className: "flex justify-between items-center mb-6" },
+      React.createElement('h1', { className: "text-3xl font-bold text-gray-800" }, "Mock Email / SMS"),
+      React.createElement('div', {
+        className: `px-4 py-2 rounded-full text-sm font-medium ${status ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`
+      },
+        status ? '✅ Connected' : '❌ Disconnected'
+      )
+    ),
 
-    <div className="flex flex-start items-center">
-      <div className="bg-blue-600 w-4 h-4 flex items-center justify-center rounded-full -ml-2 mr-3 -mt-2"></div>  
-        <i className={mailItem.type==="MAIL"?"fa fa-envelope": "fa fa-commenting" }></i>
-      <div className="flex text-gray-600 font-semibold text-xl mt-1 text-ellipsis overflow-hidden whitespace-normal ml-2 mr-3 -mt-2 w-80">    {mailItem.to.text}</div>
-    <div className="flex text-gray-600 font-semibold text-xl mt-1 text-ellipsis overflow-hidden whitespace-normal ml-2 mr-3 -mt-2">{mailItem.subject}</div>
-    </div>
-    <div className="flex flex-start items-center">
-        <div className="w-4 h-4 flex items-center justify-center rounded-full -ml-2 mr-3 -mt-2"></div>
-        <div className="flex text-sm text-slate-500 ml-2 mr-3 mb-2 duration-300 transition ease-in-out w-80">
-      Date:  {new Date(mailItem.date).toLocaleString() } </div>
-      <div className="flex text-sm text-slate-500 truncate ml-2 mr-3 mb-2 duration-300 transition ease-in-out">From: {mailItem.from.text}</div>
-    </div>
-    <div className="flex flex-start items-center">
-      <p className="text-gray-700 mb-2 mr-3 ml-4">{mailItem.html || mailItem.text}</p>
-    </div>
-  </li>
-  </div>
-  ))}
-  </ol>
-</div>
+    // Reload Button
+    React.createElement('button', {
+      type: "button",
+      onClick: () => window.location.reload(),
+      className: "inline-block px-6 py-3 bg-blue-600 text-white font-medium text-sm rounded-lg shadow hover:bg-blue-700 transition"
+    }, '↺ Reload Page'),
+
+    // Empty state
+    mails.length === 0
+      ? React.createElement('p', { className: "mt-12 text-center text-gray-400 text-lg" }, "No messages yet.")
+      : null,
+
+    // Mail List
+    React.createElement('ol', { className: "mt-8 space-y-6" },
+      mails.map((mailItem, index) =>
+        React.createElement('li', {
+          key: index,
+          className: "border border-gray-200 rounded-xl p-6 bg-white shadow-sm"
+        },
+          React.createElement('div', { className: "flex items-start gap-4" },
+            React.createElement('div', { className: "mt-1" },
+              React.createElement('i', {
+                className: mailItem.type === "MAIL"
+                  ? "fa fa-envelope text-blue-600 text-2xl"
+                  : "fa fa-comment-dots text-green-600 text-2xl"
+              })
+            ),
+            React.createElement('div', { className: "flex-1 min-w-0" },
+              React.createElement('div', { className: "flex justify-between items-start" },
+                React.createElement('h3', { className: "font-semibold text-lg text-gray-900" },
+                  mailItem.subject || "(No Subject)"
+                ),
+                React.createElement('div', { className: "text-sm text-gray-500 whitespace-nowrap ml-4" },
+                  mailItem.date ? new Date(mailItem.date).toLocaleString() : ""
+                )
+              ),
+              React.createElement('div', { className: "text-sm text-gray-600 mt-1" },
+                React.createElement('span', { className: "font-medium" }, "To: "),
+                mailItem.to?.text || "Unknown"
+              ),
+              React.createElement('div', { className: "text-sm text-gray-600" },
+                React.createElement('span', { className: "font-medium" }, "From: "),
+                mailItem.from?.text || "Unknown"
+              ),
+              React.createElement('div', {
+                className: "mt-4 text-gray-700 leading-relaxed prose max-w-none",
+                dangerouslySetInnerHTML: {
+                  __html: mailItem.html || mailItem.text || "<i>No content</i>"
+                }
+              })
+            )
+          )
+        )
+      )
+    )
   );
-  
 }
 
-
 ReactDOM.render(
-        <Email />,
-        document.getElementById('root')
-      );
+  React.createElement(Email, null),
+  document.getElementById('root')
+);
     </script>
-  </body>
+</body>
 </html>
