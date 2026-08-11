@@ -61,7 +61,7 @@ docker build . -t mosipdev/mock-smtp:v1 --network host
 To run the built image:
 
 ```shell
-docker run -p 8025:8025 -p 8080:8080 -p 8081:8081 mosipdev/mock-smtp:v1
+docker run -p 127.0.0.1:8025:8025 -p 127.0.0.1:8080:8080 -p 127.0.0.1:8081:8081 mosipdev/mock-smtp:v1
 ```
 
 ## Configuration
@@ -115,13 +115,13 @@ sufficient; there is no need for per-folder guides.
    - Send a test email, e.g.:
 
      ```shell
-     sendEmail -f sasi@yazhi.io -t test@localhost.com -s localhost:8025 -u "Test send the mail" -m "Sending the email for test"
+     sendEmail -f sender@example.test -t recipient@example.test -s localhost:8025 -u "Test send the mail" -m "Sending the email for test"
      ```
 
    - Send a test SMS via the HTTP API:
 
      ```shell
-     curl 'http://localhost:8080/sendsms?mobiles=9123456789&sender=xyz&message=this%20is%20your%20sms'
+     curl 'http://localhost:8080/sendsms?mobiles=2025550100&sender=test&message=synthetic%20test%20message'
      ```
 
    - Confirm the message appears in the browser UI over the WebSocket connection.
