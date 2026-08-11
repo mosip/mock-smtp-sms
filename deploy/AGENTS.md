@@ -36,11 +36,19 @@ deploy/
   aborts the script.
 - **`copy_cm.sh`** — downloads `copy_cm_func.sh` from the `mosip-infra`
   repo at a **hardcoded `master`-branch raw URL**
-  (`raw.githubusercontent.com/mosip/mosip-infra/master/...`), then uses
-  it to copy the `global` ConfigMap from the `default` namespace into
-  `mock-smtp`. This script has a network dependency on GitHub at runtime
-  — if that URL 404s or `mosip-infra`'s script signature changes, this
-  (and therefore `install.sh`) breaks.
+  (`raw.githubusercontent.com/mosip/mosip-infra/master/...`), then
+  executes it directly with no checksum/signature verification, to copy
+  the `global` ConfigMap from the `default` namespace into `mock-smtp`.
+  This is both a reliability risk (if that URL 404s or
+  `mosip-infra`'s script signature changes, this — and therefore
+  `install.sh` — breaks) and a supply-chain risk: because `master` is
+  mutable, a compromised or rewritten `mosip-infra` `master` branch
+  would have its script executed against the target cluster on the next
+  install, unpinned and unverified. The safer pattern (pin to a
+  reviewed commit SHA, verify a checksum before executing, or vendor
+  the helper into this repo) is not implemented here — flag this if
+  asked to review deploy-script security, and don't propagate the same
+  "fetch-and-exec from a mutable branch" pattern into any new script.
 - **`restart.sh`** — usage: `./restart.sh [kubeconfig]`. Runs
   `kubectl rollout restart deploy` across the whole `mock-smtp`
   namespace, then waits for rollout status on every Deployment found

@@ -77,10 +77,11 @@ docker build . -t mosipdev/mock-smtp:v1 --network host
 
 All configuration is environment variables read directly in `app.js` —
 there is no config file. See the root `AGENTS.md`'s Configuration table
-for the full list. Two that aren't in that table but exist in the code:
-`WS_PROTOCOL` (internal WS listen protocol, unused by anything external)
-and `HTTP_PROTOCOL` (declared but not actually referenced anywhere in
-`app.js` — do not assume changing it has any effect).
+for the common settings — that table is not exhaustive. Two additional
+variables exist in the code but aren't in that table: `WS_PROTOCOL`
+(internal WS listen protocol, unused by anything external) and
+`HTTP_PROTOCOL` (declared but **not actually referenced anywhere** in
+`app.js` — changing it has no effect).
 
 ## Agent rules
 

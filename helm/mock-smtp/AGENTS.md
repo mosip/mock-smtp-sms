@@ -61,13 +61,16 @@ helm/mock-smtp/
 ## Build & Test Commands
 
 ```bash
+helm dependency update .
 helm lint .
 helm template mock-smtp . --set istio.hosts[0]=smtp.example.mosip.net
 ```
 
-There is no `helm dependency update` step documented/needed for local
-lint/template — CI (`chart-lint-publish.yml`, path-scoped to `helm/**`)
-handles chart dependency resolution and publishing.
+`helm dependency update .` is required before `lint`/`template` locally
+— the Bitnami `common` dependency is not vendored (`charts/` doesn't
+exist in the tree) and there's no committed `Chart.lock` either, so
+`lint`/`template` fail without it. Use `helm dependency build .`
+instead if a `Chart.lock` is ever committed to this chart.
 
 ## Agent rules
 
