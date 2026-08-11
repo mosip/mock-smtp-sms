@@ -91,21 +91,24 @@ mail/SMS settings documented in `deploy/README.md`, for example
 ## Project Structure Notes
 
 ```text
-smtp/              Node.js application (server + static browser UI)
+smtp/              Node.js application (server + static browser UI) — see smtp/AGENTS.md
   app.js             SMTP/HTTP/WebSocket server logic
   index.html          Static browser UI (CDN React) that renders received mail/SMS
   package.json         npm dependencies and start script
   Dockerfile           Multi-stage Docker build
 helm/mock-smtp/     Helm chart for deploying the mock service to Kubernetes
+                    — see helm/mock-smtp/AGENTS.md
 deploy/             Shell scripts wrapping helm install/uninstall/restart for a
                     MOSIP sandbox cluster, plus deploy/README.md describing usage
+                    — see deploy/AGENTS.md
 .github/workflows/  CI: Docker image build (push-trigger.yml) and Helm chart
                     lint/publish (chart-lint-publish.yml)
 ```
 
 There are no other application modules, and no monorepo/multi-service split — this is a
-single small Node.js service plus its Helm packaging. A single root `AGENTS.md` is
-sufficient; there is no need for per-folder guides.
+single small Node.js service plus its Helm packaging. See each subfolder's own
+`AGENTS.md` for module-specific detail; this root file covers what's common
+across all three.
 
 ## Development Workflow
 
